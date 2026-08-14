@@ -64,7 +64,7 @@ class OrganizadorEstructura:
     def __init__(self, ventana_principal):
         self.root = ventana_principal
         self.root.title("Organizador de Estructura de Pruebas")
-        self.root.geometry("650x400")
+        self.root.geometry("750x500")
         self.root.resizable(False, False)
         
         # Paleta de colores oscura
