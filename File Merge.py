@@ -176,6 +176,7 @@ class OrganizadorEstructura:
 
         archivos_copiados = 0
         zips_creados = 0
+        operaciones_interfaz = 0 # <-- NUEVO: Contador para no saturar la UI
 
         self.lbl_estado.config(text="Procesando... copiando archivos.", fg="white")
         self.root.update()
@@ -206,6 +207,10 @@ class OrganizadorEstructura:
                                 if not os.path.exists(ruta_destino_archivo):
                                     shutil.copy2(ruta_origen_archivo, ruta_destino_archivo)
                                     archivos_copiados += 1
+                                    operaciones_interfaz += 1
+
+                                    if operaciones_interfaz % 50 == 0:
+                                        self.root.update()
                             except shutil.SameFileError:
                                 pass
                             
@@ -246,6 +251,10 @@ class OrganizadorEstructura:
 
         except Exception as e:
             self.lbl_estado.config(text=f"Error durante el proceso: {str(e)}", fg="red")
+        finally:
+            # <-- NUEVO: Fuerza la liberación de RAM al terminar el ciclo pesado
+            import gc
+            gc.collect()
 
 
 if __name__ == "__main__":
