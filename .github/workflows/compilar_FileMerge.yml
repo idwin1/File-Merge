@@ -27,11 +27,11 @@ jobs:
       run: |
         # Usamos --windowed para ocultar la consola
         # El archivo de salida se llamará "TomarCaptura.exe"
-        pyinstaller --noconfirm --onefile --windowed --name "File Merge" '.\File Merge.py'
+        pyinstaller --noconfirm --onefile --windowed --name "FileMerge" '.\File Merge.py'
 
     - name: Subir archivo a Ejecutables
       env:
         GH_TOKEN: ${{ secrets.TOKEN_EJECUTABLES }}
       run: |
         # Sube el ejecutable al repositorio central de Ejecutables en el tag 'produccion'
-        gh release upload Produccion "dist/File Merge.exe" --repo idwin1/Ejecutables --clobber
+        gh release upload Produccion "dist/FileMerge.exe" --repo idwin1/Ejecutables --clobber
