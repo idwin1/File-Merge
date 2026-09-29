@@ -59,6 +59,58 @@ def guardar_configuracion(datos):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(datos, f, indent=4, ensure_ascii=False)
 
+
+
+class ToolTip:
+    def __init__(self, widget, text, delay=600):
+        self.widget = widget
+        self.text = text
+        self.delay = delay  # Tiempo en milisegundos (600ms = 0.6 segundos)
+        self.tooltip_window = None
+        self.timer_id = None
+        
+        # Eventos del mouse
+        self.widget.bind("<Enter>", self.al_entrar)
+        self.widget.bind("<Leave>", self.al_salir)
+        self.widget.bind("<ButtonPress>", self.al_salir) # Lo oculta si el usuario hace clic
+
+    def al_entrar(self, event=None):
+        self.cancelar_temporizador() # Asegura que no haya duplicados
+        # Programa la aparición de la ventana después de 'delay' milisegundos
+        self.timer_id = self.widget.after(self.delay, self.mostrar_tooltip)
+
+    def al_salir(self, event=None):
+        self.cancelar_temporizador()
+        self.ocultar_tooltip()
+
+    def cancelar_temporizador(self):
+        if self.timer_id:
+            self.widget.after_cancel(self.timer_id)
+            self.timer_id = None
+
+    def mostrar_tooltip(self):
+        # Evita que se abran múltiples ventanas
+        if self.tooltip_window:
+            return
+            
+        x = self.widget.winfo_rootx() + 20
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
+        
+        self.tooltip_window = tk.Toplevel(self.widget)
+        self.tooltip_window.wm_overrideredirect(True)
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+        
+        label = tk.Label(self.tooltip_window, text=self.text, 
+                         background="#1e293b", foreground="white", 
+                         relief="solid", borderwidth=1, 
+                         font=("Segoe UI", 10), padx=8, pady=4)
+        label.pack()
+
+    def ocultar_tooltip(self):
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
+
 class OrganizadorEstructura:
 
     def __init__(self, ventana_principal):
@@ -118,10 +170,26 @@ class OrganizadorEstructura:
 
         btn_opts = {"font": ("Segoe UI", 9, "bold"), "fg": "white", "relief": "flat", "padx": 10, "pady": 5, "cursor": "hand2"}
 
-        tk.Button(frame_acciones, text="📂 Carpeta Origen", bg=self.btn_blue, command=self.cambiar_origen, **btn_opts).pack(side="left", padx=5)
-        tk.Button(frame_acciones, text="📁 Carpeta Destino", bg=self.btn_orange, command=self.cambiar_destino, **btn_opts).pack(side="left", padx=5)
-        tk.Button(frame_acciones, text="⚡ Organizar y Zipear", bg=self.btn_teal, command=self.organizar_archivos, **btn_opts).pack(side="right", padx=5)
 
+        # Botón Origen
+        btn_origen = tk.Button(frame_acciones, text="📂 Carpeta Origen", bg=self.btn_blue, command=self.cambiar_origen, **btn_opts)
+        btn_origen.pack(side="left", padx=5)
+        ToolTip(btn_origen, "Selecciona la carpeta donde están todos los archivos mezclados.")
+
+        # Botón Destino
+        btn_destino = tk.Button(frame_acciones, text="📁 Carpeta Destino", bg=self.btn_orange, command=self.cambiar_destino, **btn_opts)
+        btn_destino.pack(side="left", padx=5)
+        ToolTip(btn_destino, "Elige dónde se creará la estructura final de carpetas.")
+
+        # Botón Acción
+        btn_zipear = tk.Button(frame_acciones, text="⚡ Organizar y Zipear", bg=self.btn_teal, command=self.organizar_archivos, **btn_opts)
+        btn_zipear.pack(side="right", padx=5)
+        ToolTip(btn_zipear, "Acomoda los archivos en sus carpetas y genera los archivos .zip.")
+        #tk.Button(frame_acciones, text="📂 Carpeta Origen", bg=self.btn_blue, command=self.cambiar_origen, **btn_opts).pack(side="left", padx=5)
+        #tk.Button(frame_acciones, text="📁 Carpeta Destino", bg=self.btn_orange, command=self.cambiar_destino, **btn_opts).pack(side="left", padx=5)
+        #tk.Button(frame_acciones, text="⚡ Organizar y Zipear", bg=self.btn_teal, command=self.organizar_archivos, **btn_opts).pack(side="right", padx=5)
+
+        
         # Panel de Rutas
         frame_rutas = tk.Frame(self.root, bg=self.panel_color, padx=20, pady=20)
         frame_rutas.pack(fill="both", expand=True, padx=20, pady=20)
